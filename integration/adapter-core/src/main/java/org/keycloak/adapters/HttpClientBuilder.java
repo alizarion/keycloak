@@ -1,8 +1,10 @@
 package org.keycloak.adapters;
 
+import org.apache.http.HttpHost;
 import org.apache.http.client.CookieStore;
 import org.apache.http.client.HttpClient;
 import org.apache.http.conn.ClientConnectionManager;
+import org.apache.http.conn.params.ConnRoutePNames;
 import org.apache.http.conn.scheme.PlainSocketFactory;
 import org.apache.http.conn.scheme.Scheme;
 import org.apache.http.conn.scheme.SchemeRegistry;
@@ -95,6 +97,8 @@ public class HttpClientBuilder {
     protected TimeUnit socketTimeoutUnits = TimeUnit.MILLISECONDS;
     protected long establishConnectionTimeout = -1;
     protected TimeUnit establishConnectionTimeoutUnits = TimeUnit.MILLISECONDS;
+    private final String PROXY_URL = System.getProperty("http.proxyHost");
+    private final String PROXY_PORT = System.getProperty("http.proxyPort");
 
 
     /**
@@ -304,6 +308,12 @@ public class HttpClientBuilder {
                 });
 
             }
+            // Adding proxy management with default JVM proxy params
+            if (PROXY_URL !=null && PROXY_PORT != null){
+                HttpHost proxy = new HttpHost(PROXY_URL,Integer.parseInt(PROXY_PORT));
+                client.getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY,proxy);
+            }
+
             return client;
         } catch (Exception e) {
             throw new RuntimeException(e);
